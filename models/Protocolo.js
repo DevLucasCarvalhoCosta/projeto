@@ -2,8 +2,13 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db.config');
 
 const Protocolo = sequelize.define('Protocolo', {
-  numero: {
+  id: {
     type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  numero: {
+    type: DataTypes.STRING,
     allowNull: false,
     unique: true
   },
@@ -17,15 +22,15 @@ const Protocolo = sequelize.define('Protocolo', {
   },
   dataCriacao: {
     type: DataTypes.DATE,
-    allowNull: false
+    allowNull: false,
+    defaultValue: DataTypes.NOW // Define o valor padrão como a data/hora atual
   },
   statusVotacao: {
-    type: DataTypes.ENUM('pendente', 'aprovado', 'reprovado', 'nao votado'),
-    allowNull: false,
-    defaultValue: 'nao votado'
+    type: DataTypes.STRING,
+    allowNull: false
   },
   pdfPath: {
-    type: DataTypes.STRING, // Adicione esta linha
+    type: DataTypes.STRING,
     allowNull: false
   }
 });

@@ -1,38 +1,23 @@
-require('dotenv').config();
+require('dotenv').config(); // Certifique-se de que isso está no início do arquivo
 
 const express = require('express');
 const cors = require('cors');
-const multer = require('multer');
-const path = require('path');
-const routes = require('./routes/routes');
-const sequelize = require('./config/db.config');
+const fileUpload = require('express-fileupload'); // Importa o express-fileupload
+const routes = require('./routes/routes'); // Ajuste o caminho conforme necessário
 
 const app = express();
 
 // Middleware para permitir todas as origens
-app.use(cors());
+app.use(cors()); // Permite todas as origens
 
-// Middleware para lidar com o upload de arquivos
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/') // Diretório onde os arquivos serão salvos
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)) // Nome do arquivo
-  }
-});
-const upload = multer({ storage: storage });
+// Middleware para manipulação de arquivos
+app.use(fileUpload());
 
-// Middleware para analisar o corpo da solicitação como JSON
+// Outros middlewares
 app.use(express.json());
-
-// Middleware para analisar o corpo da solicitação de formulário
 app.use(express.urlencoded({ extended: true }));
 
-// Middleware para lidar com o upload de arquivos em todas as rotas que precisam disso
-app.use(upload.single('pdf')); // 'pdf' é o nome do campo no formulário de upload
-
 // Usando o router para definir as rotas
-app.use('/api', routes);
+app.use('/api', routes); // Prefixo '/api' para todas as rotas
 
 module.exports = app;

@@ -1,38 +1,48 @@
+const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const Protocolo = require('../models/Protocolo');
 
-// Função para criar um novo protocolo com arquivo PDF
 exports.criarProtocolo = async (req, res) => {
-  const { numero, assunto, conteudo, dataCriacao } = req.body;
-  const pdf = req.files?.pdf; // Assumindo que o arquivo PDF é enviado como parte do corpo da requisição
+  const { numero, assunto, conteudo, statusVotacao, dataCriacao } = req.body;
+  const pdf = req.files?.pdf; // Assuming that the PDF file is sent as part of the request body
 
   try {
-    // Verifique se um arquivo PDF foi enviado
+    // Check if a PDF file was sent
     if (!pdf) {
       return res.status(400).json({ erro: 'O arquivo PDF é obrigatório' });
     }
 
-    // Salvar o arquivo PDF no servidor
+    // Save the PDF file on the server
     const pdfName = `${Date.now()}_${pdf.name}`;
     const pdfPath = path.join(__dirname, '..', 'uploads', pdfName);
+    
+    // Ensure that the upload directory exists
+    const uploadDir = path.join(__dirname, '..', 'uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir);
+    }
+
     await pdf.mv(pdfPath);
 
-    // Criar um novo protocolo com o caminho do arquivo PDF
+    // Create a new protocol with the PDF file path
     const novoProtocolo = await Protocolo.create({
       numero,
       assunto,
       conteudo,
-      dataCriacao,
-      pdfPath // Salva o caminho do arquivo no banco de dados
+      statusVotacao,
+      dataCriacao: dataCriacao || new Date(), // Use the current date if dataCriacao is not provided
+      pdfPath: pdfName, // Save the file path in the database
     });
 
     res.status(201).json(novoProtocolo);
   } catch (error) {
+    console.error("Erro ao criar protocolo:", error);
     res.status(500).json({ erro: error.message });
   }
 };
 
+// Função para listar todos os protocolos
 exports.listarProtocolos = async (req, res) => {
   try {
     const protocolos = await Protocolo.findAll();
@@ -43,7 +53,8 @@ exports.listarProtocolos = async (req, res) => {
         assunto: protocolo.assunto,
         conteudo: protocolo.conteudo,
         dataCriacao: protocolo.dataCriacao,
-        pdfPath: protocolo.pdfPath // Inclui o caminho do arquivo PDF
+        statusVotacao: protocolo.statusVotacao,
+        pdfPath: protocolo.pdfPath
       };
     });
     res.status(200).json(protocolosComPDF);
@@ -52,6 +63,7 @@ exports.listarProtocolos = async (req, res) => {
   }
 };
 
+// Função para obter um protocolo por ID
 exports.obterProtocoloPorId = async (req, res) => {
   const { id } = req.params;
   try {
@@ -79,7 +91,7 @@ exports.atualizarProtocolo = async (req, res) => {
       const pdfName = `${Date.now()}_${pdf.name}`;
       const pdfPath = path.join(__dirname, '..', 'uploads', pdfName);
       await pdf.mv(pdfPath);
-      updateData.pdfPath = pdfPath;
+      updateData.pdfPath = pdfName;
     }
 
     const [rowsUpdated] = await Protocolo.update(updateData, {
@@ -100,15 +112,18 @@ exports.atualizarProtocolo = async (req, res) => {
 // Função para excluir um protocolo pelo ID
 exports.excluirProtocolo = async (req, res) => {
   const { id } = req.params;
+
   try {
     const protocolo = await Protocolo.findByPk(id);
     if (!protocolo) {
       return res.status(404).json({ erro: 'Protocolo não encontrado' });
     }
 
-    // Excluir o arquivo PDF associado
-    if (protocolo.pdfPath) {
-      fs.unlinkSync(protocolo.pdfPath);
+    const caminho = path.join(__dirname, '..', 'uploads', protocolo.pdfPath);
+    
+    // Check if PDF file path exists before attempting to delete it
+    if (fs.existsSync(caminho)) {
+      fs.unlinkSync(caminho);
     }
 
     await Protocolo.destroy({ where: { id } });
