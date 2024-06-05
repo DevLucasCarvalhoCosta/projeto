@@ -15,6 +15,7 @@ const SessaoPlenaria = sequelize.define('SessaoPlenaria', {
 });
 
 // Defina a relação entre SessaoPlenaria e Protocolo (uma sessão plenária pode ter muitos protocolos)
-SessaoPlenaria.belongsToMany(Protocolo, { through: 'protocolo_sessaoplenaria' });
+SessaoPlenaria.hasMany(Protocolo, { as: 'protocolos', foreignKey: 'sessaoPlenariaId' });
+
 
 module.exports = SessaoPlenaria;
