@@ -13,7 +13,7 @@ const syncDatabase = async () => {
     console.log('Connection has been established successfully.');
 
     // Sincroniza os modelos com o banco de dados
-    await sequelize.sync(); // Use { force: true } apenas em desenvolvimento para recriar tabelas
+    await sequelize.sync({ alter: true }); // Use alter: true para atualizar tabelas existentes
 
     console.log('All models were synchronized successfully.');
   } catch (error) {

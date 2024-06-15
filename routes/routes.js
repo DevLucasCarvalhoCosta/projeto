@@ -3,25 +3,27 @@ const router = express.Router();
 const usuarioController = require('../controllers/usuarioController');
 const sessaoPlenariaController = require('../controllers/sessaoPlenariaController');
 const protocoloController = require('../controllers/protocoloController');
+const { verificarToken } = require('../middlewares/authMiddleware');
+
 
 // Rotas para usuários
-router.post('/usuarios', usuarioController.registrarUsuario);
-router.get('/usuarios', usuarioController.listarUsuarios);
-router.get('/usuarios/:id', usuarioController.obterUsuarioPorId);
-router.put('/usuarios/:id', usuarioController.atualizarUsuario);
-router.delete('/usuarios/:id', usuarioController.excluirUsuario);
+router.post('/usuarios', verificarToken, usuarioController.registrarUsuario);
+router.get('/usuarios',  usuarioController.listarUsuarios);
+router.get('/usuarios/:id', verificarToken, usuarioController.obterUsuarioPorId);
+router.put('/usuarios/:id', verificarToken, usuarioController.atualizarUsuario);
+router.delete('/usuarios/:id', verificarToken, usuarioController.excluirUsuario);
 router.post('/login', usuarioController.loginUsuario);
 
 // Rotas para sessões plenárias
-router.post('/sessoes-plenarias', sessaoPlenariaController.criarSessaoPlenaria);
-router.get('/sessoesplenarias', sessaoPlenariaController.listarSessoesPlenarias);
-router.get('/sessoesplenarias/:id/protocolos', sessaoPlenariaController.buscarProtocolosPorSessaoPlenaria);
+router.post('/sessoes-plenarias', verificarToken, sessaoPlenariaController.criarSessaoPlenaria);
+router.get('/sessoesplenarias', verificarToken, sessaoPlenariaController.listarSessoesPlenarias);
+router.get('/sessoesplenarias/:id/protocolos', verificarToken, sessaoPlenariaController.buscarProtocolosPorSessaoPlenaria);
 
 // Rotas para protocolos
-router.post('/protocolos', protocoloController.criarProtocolo);
-router.get('/protocolos', protocoloController.listarProtocolos);
-router.get('/protocolos/:id', protocoloController.obterProtocoloPorId);
-router.put('/protocolos/:id', protocoloController.atualizarProtocolo);
-router.delete('/protocolos/:id', protocoloController.excluirProtocolo);
+router.post('/protocolos', verificarToken, protocoloController.criarProtocolo);
+router.get('/protocolos', verificarToken, protocoloController.listarProtocolos);
+router.get('/protocolos/:id', verificarToken, protocoloController.obterProtocoloPorId);
+router.put('/protocolos/:id', verificarToken, protocoloController.atualizarProtocolo);
+router.delete('/protocolos/:id', verificarToken, protocoloController.excluirProtocolo);
 
 module.exports = router;

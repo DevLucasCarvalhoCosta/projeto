@@ -1,4 +1,3 @@
-require('dotenv').config(); // Certifique-se de que isso está no início do arquivo
 
 const express = require('express');
 const cors = require('cors');
